@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Image Processing Lab | Yogeshwar Kadam</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">IP</div>
+      <div><strong>ImageLab</strong><span>Practical Portal</span></div>
+    </div>
+
+    <div class="profile-card">
+      <div class="avatar">YK</div>
+      <div class="profile-main">
+        <h3>Yogeshwar Kadam</h3>
+        <span>Computer Science</span>
+      </div>
+      <div class="profile-details">
+        <div><small>USN</small><b>CS25D026</b></div>
+        <div><small>YEAR</small><b>3rd Year</b></div>
+        <div><small>SECTION</small><b>D</b></div>
+      </div>
+    </div>
+
+    <nav>
+      <p class="nav-label">LAB MENU</p>
+      <button class="side-link active" onclick="scrollToTop()"><span>⌂</span> Dashboard</button>
+      <button class="side-link" onclick="document.getElementById('practicals').scrollIntoView({behavior:'smooth'})"><span>▦</span> Practicals</button>
+      <button class="side-link" onclick="document.getElementById('workspace').scrollIntoView({behavior:'smooth'})"><span>⚙</span> Workspace</button>
+    </nav>
+
+    <div class="side-footer">
+      <div class="live-dot"></div>
+      <div><b>System Ready</b><small>Python • Flask • OpenCV</small></div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <div>
+        <div class="breadcrumb">IMAGE PROCESSING / LAB</div>
+        <h1>Image Processing Lab</h1>
+        <p>Perform practical image processing operations in a clean, interactive workspace.</p>
+      </div>
+      <div class="top-status"><span class="status-ring"></span><div><b>Lab Session</b><small>Interactive mode · Ready</small></div></div>
+    </header>
+
+    <section class="stats">
+      <div class="stat-card"><div class="stat-icon">01</div><div><b>09</b><span>Practicals</span></div></div>
+      <div class="stat-card"><div class="stat-icon">+</div><div><b>03</b><span>Post Labs</span></div></div>
+      <div class="stat-card"><div class="stat-icon">CV</div><div><b>OpenCV</b><span>Processing Engine</span></div></div>
+      <div class="stat-card"><div class="stat-icon">✓</div><div><b>Ready</b><span>System Status</span></div></div>
+    </section>
+
+    <section id="practicals" class="section">
+      <div class="section-heading">
+        <div><span class="section-kicker">LAB MODULES</span><h2>Select a Practical</h2><p>Choose a practical to load its image processing operations.</p></div>
+        <div class="pill">12 MODULES</div>
+      </div>
+
+      <section class="practical-grid">
+        {% for pr in range(1,13) %}
+        <button class="practical-btn {% if pr == 5 %}featured{% endif %}" onclick="openPractical({{pr}})" id="pr-btn-{{pr}}">
+          <span class="num">{{ "%02d"|format(pr) }}</span>
+          <span class="ptext">
+            <b>{% if pr==1 %}Image Basics
+            {% elif pr==2 %}Image Operations
+            {% elif pr==3 %}Image Transformations
+            {% elif pr==4 %}Image Enhancement
+            {% elif pr==5 %}Blur Filters
+            {% elif pr==6 %}Image Restoration
+            {% elif pr==7 %}Image Compression
+            {% elif pr==8 %}Morphological Operations
+            {% elif pr==9 %}Template Matching
+            {% elif pr==10 %}Top-Hat Illumination
+            {% elif pr==11 %}Colour Spaces
+            {% else %}Edge Detection{% endif %}</b>
+            <small>{% if pr >= 10 %}POST LAB{% else %}PRACTICAL {{pr}}{% endif %}</small>
+          </span><span class="arrow">↗</span>
+        </button>
+        {% endfor %}
+      </section>
+    </section>
+
+    <section class="workspace" id="workspace">
+      <div class="workspace-head">
+        <div><span class="section-kicker">INTERACTIVE WORKSPACE</span><h2 id="workspace-title">Choose a practical above</h2></div>
+        <button class="ghost" onclick="clearWorkspace()">Reset</button>
+      </div>
+      <div id="operation-panel" class="hidden">
+        <div class="operation-layout">
+          <aside class="ops"><h3>Operations</h3><p>Select an operation</p><div id="operation-buttons"></div></aside>
+          <section class="runner">
+            <div class="upload-box">
+              <div class="upload-title"><div class="upload-icon">↑</div><div><h3 id="operation-title">Select an operation</h3><p id="operation-help">The required upload fields will appear here.</p></div></div>
+              <div id="upload-fields"></div>
+              <button class="run-btn" id="run-btn" onclick="runSelected()" disabled>Run Operation <span>→</span></button>
+            </div>
+            <div id="metrics"></div>
+            <div id="results" class="results"></div>
+          </section>
+        </div>
+      </div>
+    </section>
+    <footer>Image Processing Lab · Yogeshwar Kadam · CS25D026 · 3rd Year · Section D</footer>
+  </main>
+</div>
+<script>
+const OPS = {{ ops|tojson }};
+let selectedPr = null, selectedOp = null;
+function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
+function openPractical(pr){
+ selectedPr=pr; selectedOp=null;
+ document.querySelectorAll('.practical-btn').forEach(b=>b.classList.remove('active'));
+ document.getElementById('pr-btn-'+pr).classList.add('active');
+ document.getElementById('workspace-title').textContent=`Practical ${pr} — ${document.querySelector('#pr-btn-'+pr+' b').textContent}`;
+ document.getElementById('operation-panel').classList.remove('hidden');
+ document.getElementById('results').innerHTML=''; document.getElementById('metrics').innerHTML='';
+ renderOps(); document.getElementById('workspace').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function renderOps(){
+ const wrap=document.getElementById('operation-buttons'); wrap.innerHTML='';
+ OPS[selectedPr].forEach(([id,label,inputs])=>{
+  const b=document.createElement('button'); b.className='op-btn'; b.textContent=label;
+  b.onclick=()=>selectOperation(id,label,inputs,b); wrap.appendChild(b);
+ });
+}
+function selectOperation(id,label,inputs,button){
+ selectedOp={id,label,inputs}; document.querySelectorAll('.op-btn').forEach(b=>b.classList.remove('selected')); button.classList.add('selected');
+ document.getElementById('operation-title').textContent=label;
+ document.getElementById('operation-help').textContent=selectedPr===6&&inputs.length===1?'Upload an image or use the generated demo input.':inputs.length===1?'Upload the image required by this operation.':'Upload both images. For Practical 9, the template should be smaller than the input image.';
+ renderInputs(inputs); document.getElementById('run-btn').disabled=false; document.getElementById('results').innerHTML=''; document.getElementById('metrics').innerHTML='';
+}
+function renderInputs(inputs){
+ const box=document.getElementById('upload-fields'); box.innerHTML='';
+ inputs.forEach(key=>{
+  const label=document.createElement('label'); label.className='file-field';
+  const title=key==='image'?'Input Image':key==='image1'?'Image 1':key==='image2'?'Image 2':'Template Image';
+  label.innerHTML=`<span>${title}</span><input type="file" name="${key}" accept="image/*" onchange="showFileName(this)">`; box.appendChild(label);
+ });
+}
+function showFileName(input){if(input.files.length){const span=input.parentElement.querySelector('span');span.textContent=span.textContent.split(' —')[0]+' — '+input.files[0].name;}}
+async function runSelected(){
+ if(!selectedOp)return; const form=new FormData(); document.querySelectorAll('#upload-fields input').forEach(i=>{if(i.files[0])form.append(i.name,i.files[0]);});
+ document.getElementById('run-btn').disabled=true;
+ try{const res=await fetch(`/api/run/${selectedPr}/${selectedOp.id}`,{method:'POST',body:form});const data=await res.json();if(!data.ok)throw new Error(data.error);renderResults(data);}
+ catch(e){document.getElementById('results').innerHTML=`<div class="error">${escapeHtml(e.message)}</div>`;}
+ finally{document.getElementById('run-btn').disabled=false;}
+}
+function renderResults(data){
+ const results=document.getElementById('results'); results.innerHTML='';
+ data.cards.forEach(card=>{const div=document.createElement('article');div.className='result-card';div.innerHTML=`<h4>${escapeHtml(card.title)}</h4><img src="${card.image}" alt="${escapeHtml(card.title)}">`;results.appendChild(div);});
+ const info=data.info;
+ if(info&&typeof info==='object'){let rows='';Object.entries(info).forEach(([k,v])=>rows+=`<div><span>${escapeHtml(k)}</span><strong>${escapeHtml(Array.isArray(v)?v.join(', '):String(v))}</strong></div>`);document.getElementById('metrics').innerHTML=`<div class="metrics"><h3>Output / Analysis</h3>${rows}</div>`;}
+ else if(info)document.getElementById('metrics').innerHTML=`<div class="message">${escapeHtml(String(info))}</div>`;
+}
+function clearWorkspace(){selectedPr=null;selectedOp=null;document.querySelectorAll('.practical-btn').forEach(b=>b.classList.remove('active'));document.getElementById('operation-panel').classList.add('hidden');document.getElementById('workspace-title').textContent='Choose a practical above';document.getElementById('results').innerHTML='';document.getElementById('metrics').innerHTML='';}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+</script>
+</body>
+</html>
