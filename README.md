@@ -3,8 +3,8 @@
 A Flask + Python + OpenCV webpage that converts the 9 practicals from the supplied practical ZIP into browser-based operations.
 
 ## Student details
-- Name: Yogeshwar Kadam
-- USN: CS25D026
+- Name: Sumaiya Mehvish 
+- USN: CS25D024
 - Year: 3rd
 - Semester: 5th
 - Section: D
